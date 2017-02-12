@@ -1,0 +1,88 @@
+TRAINER TEMPLATE based on eat - exylum's application template
+
+   Seems complicated at start but really isn't if You just want to remake it to
+Your liking. If so just read point 1, or if You want to know more read 2 also.
+
+----
+TOC:
+----
+1. Basic stuff
+ 1.1 How do I compile this?
+ 1.2 Do I have to go through the entire code?
+ 1.3 How do i kill this damn music?
+ 1.4 Suggestion
+ 
+2. Advanced stuff
+ 2.1 What are the rest of the files for?
+ 2.2 Making a smaller exe.
+ 2.3 Interresting bits in this example.
+ 
+3. Contact info
+ 
+ 
+
+1.1 How do I compile this?
+   Without going into much technical detail install dev-cpp (to c:\dev-cpp) and
+   run the make.bat file.
+   
+1.2 Do I have to go through the entire code?
+   No You don't. All You need to look at are the following files:
+ - application.h - the "train" function.
+   That's where the program is checking which key's been pressed. Insert the
+   code of Your trainer here. An example of writing some bytes to memory has
+   also been provided.
+ - main.h - some variables.
+   You change stuff between "change this for Your trainer" and "end of things
+   You need to change". The size of main window, and the info window (should be
+   the same as the size of bitmaps You want to put in the background). How much
+   should the info window should be moved in relation to main window (try to
+   move the main window and look like the info window is following it). The last
+   one is the name of the game window You want to train.
+ - main.cpp - creation of windows, buttons etc.
+   You change stuff between "controls being created here" and "finished creating
+   controls". Basicly these are all the windows, buttons and listbox for the
+   nfo. Should be pretty easy to understand what's what.
+ - res.rc - (in eat folder) resources.
+   Here are all the resources i used for this application. Feel free to 
+   add/remove to suit Your trainer.
+
+1.3 How do i kill this damn music?
+   :) in the main.cpp file comment music_on (not the "#define" one, later in
+   code). You
+   
+1.4 Suggestion
+   I agree that there's a lot to take in at once but consider this: You have an
+   application running out of the box. Just change little things and see what
+   effect they have on the program. After a while You'll get familiar with it.
+   
+   
+
+2.1 What are the rest of the files for?
+   Basicly this whole trainer template is based on the application template
+   which was build by superclassing the windows' controlls. The files in eat
+   folder do just that, superclass windows, buttons, edits etc. They add
+   bitmaps, transparency, colors and such. For more detail go to the eat folder
+   and run the help.txt file.
+    
+2.2 Making the exe smaller.
+   As You can see there are a lot of things that aren't necessary most of the
+   time like file editing, http support, zlib, string routines, xm support and
+   more. If You want to make the exe smaller You can remove all that. I'll also
+   mention that the exe is already "stripped" and "upx'ed" right after
+   compilation.
+   
+2.3 Interrresting bits in this example.
+   - main.cpp
+    * followme function moves the second window based on the movement of the
+      first
+    * what_to_do function covers two things: escape key handling and scrolling
+      of the nfobox in second window
+   - application.cpp
+    * train function finds the game based on its window name, gives us debug
+      privilages and then checks if any of the listed buttons has been pressed
+      
+
+
+3. Contact info.
+   If You have any questions about this app mail me at:
+   exylum@gmail.com

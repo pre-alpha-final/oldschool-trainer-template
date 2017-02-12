@@ -1,0 +1,314 @@
+-=-=-=--==-=-=-=-=
+Table of Contents:
+-=-=-=--==-=-=-=-=
+
+1. General Notes
+ 1.1 How it's written
+ 1.2 Size
+ 1.3 Contact
+
+2. Classes
+ 2.1 exy_window
+ 2.2 exy_button
+ 2.3 exy_rbutton
+ 2.4 exy_edit
+ 2.5 exy_listbox
+ 2.6 exy_combo
+
+3. Examples
+ 3.1 Nfo type font
+ 3.2 Music
+ 3.3 OpenDialog
+ 3.4 Listbox scrolling
+ 3.5 Handling escape
+ 3.6 Close and minimize
+ 3.7 Sc colors
+ 3.8 Timer+thread for wait-and-do-things-with-sync-sock-connection-without-freezing-application
+ 3.9 Post stuff
+ 3.10 Loading configs
+
+4. Other stuff
+ 4.1 Piping under windows
+
+
+-=-=-=--==-=-
+General Notes
+-=-=-=--==-=-
+1.1 How it's written
+   There's some formal data, but mainly a lot of copy & paste pieces which purpose is to shorten the mindless creation and setup of windows.
+
+1.2 Size
+   The size can be reduced from ~300kB to ~100kB (packed ~100kB to ~30kB) by removing usage of strings (currently used in exy_find, exy_send and exy_strutils).
+
+1.3 Contact
+   Questions? E-mail: exylum@gmail.com (+gtalk), also look for exylum on Efnet.
+
+
+-=-=-=-
+Classes
+-=-=-=-
+2.1 exy_window
+   Creates a window. Creator is: exywindow("name", Instance)
+Example usage:
+ window1 = new exywindow("window1", hInstance);
+ window1->pos(100, 100, 160, 160);
+ window1->setbmp("back");
+ //window1->transparent(RGB(0,0,0));
+ //window1->deletefromtaskbar();
+ window1->center();
+ window1->show();
+
+
+2.2 exy_button
+   Creates a button. Creator is: exybutton("name", Instance, Owner)
+Example usage:
+ button1 = new exybutton("button1", hInstance, window1->windowh);
+ button1->pos(0, 0, 32, 32);
+ button1->setbmp("x", "x2");
+ //button1->transparency(0x00000000);
+ button1->lmbc = bfunction;
+ button1->show();
+On click function's prototype is:
+ void b1click()
+For setting text use this method:
+ void settext(HFONT font, char* text, int tleft, int ttop, int tright, COLORREF col)
+
+
+2.3 exy_rbutton
+   Creates a radio button. Creator is: exyrbutton("name", Instance, Owner)
+Example usage:
+ rbutton1 = new exyrbutton("rbutton1", hInstance, window1->windowh);
+ rbutton1->pos(0, 0, 32, 32);
+ rbutton1->setbmp("x", "x2");
+ //rbutton1->transparency(0x00000000);
+ rbutton1->lmbc_on = onfunction;
+ rbutton1->lmbc_off = offfunction;
+ rbutton1->show();
+On click functions' prototype is:
+ void rb1click()
+For setting text use this method:
+ void settext(HFONT font, char* text, int tleft, int tright ,int ttop)
+
+
+2.4 exy_edit
+   Creates an edit. Creator is: exyedit("name", Instance, Owner, Id, CreationFlags);
+Example usage:
+ edit1 = new exyedit("edit1", hInstance, window1->windowh, 100, WS_CHILD|ES_READONLY);
+ edit1->pos(0, 0, 60, 16);
+ edit1->seteditcolors(RGB(0, 0, 0), RGB(0, 128, 255), RGB(0, 0, 0));
+ edit1->settext("edit1");
+ edit1->show();
+
+
+2.5 exy_listbox
+   Creates a listbox. Creator is: exylistbox("name", Instance, Owner, Id);
+Example usage:
+ listbox1 = new exylistbox("listbox1", hInstance, window1->windowh, 100);
+ listbox1->pos(0, 0, 490, 100);
+ listbox1->setnfo(900); //for resource: >>900 RCData "app.nfo"<<
+ listbox1->setlbcolors(RGB(0, 0, 0), RGB(0, 128, 255), RGB(0, 0, 0));
+ listbox1->show();
+For scrolling use this methods:
+ void nfoup();
+ void nfodown();
+Also useful:
+ void add(const char*);
+ void settext(char*);
+ void clear(); 
+
+
+2.6 exy_combo
+   Creates a combobox. Creator is: exycombo("name", Instance, Owner, Id, CreationFlags);
+Example usage:
+ combo1 = new exycombo("combo1", hInstance, window1->windowh, 100, WS_CHILD|CBS_DROPDOWNLIST);
+ combo1->pos(0, 0, 80, 24);
+ combo1->setcombocolors(RGB(0, 128, 255), RGB(0, 128, 255), RGB(0, 0, 0));
+ combo1->setbmp("con", "coff", 0x00000000);
+ combo1->addline("1");
+ combo1->selchange = selchange;
+ combo1->show();
+On change function's prototype is:
+ void cbchange()
+Also useful:
+ void delline(int);
+ void getline(char *, int);
+ void setstarttext(int);
+Combo's edit position is: 3,3,-18,-3
+
+
+-=-=-=--
+Examples
+-=-=-=--
+3.1 Nfo type font
+CreateFont(8,5,0,0,FW_NORMAL,0,0,0,OEM_CHARSET,
+  OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS ,DEFAULT_QUALITY,
+  FIXED_PITCH || FF_DONTCARE,"Terminal");
+
+
+3.2 Music
+   The fastest way is to add it to resource, name it "music" and use the music_on, and music_off defined in main.cpp.
+Example resource: >>music 10 "app.xm"<<
+
+
+3.3 OpenDialog
+ OPENFILENAME ofn;
+ char filename[MAX_PATH] = "";
+ ZeroMemory(&ofn, sizeof(ofn));
+ ofn.lStructSize = sizeof(OPENFILENAME);
+ ofn.hwndOwner = rbutton1->rbuttonh;
+ ofn.lpstrFilter = "Exe File (*.exe)\0*.exe\0";
+ ofn.nMaxFile = MAX_PATH;
+ ofn.lpstrFile = filename;
+ ofn.lpstrDefExt = "exe";
+ ofn.Flags = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+ GetOpenFileName(&ofn);
+ //filename has the file name
+
+
+3.4 Listbox scrolling
+Put this in main window's timer:
+ if (button1->pressed)   //for scrolling the listbox up
+  listbox1->nfoup();
+ if (button2->pressed) //for scrolling the listbox down
+  listbox1->nfodown();
+
+
+3.5 Handling escape
+Put this in main window's timer:
+ if (GetAsyncKeyState(VK_ESCAPE) & 1) //escape pressed
+ {
+  if ((GetActiveWindow()==window1->windowh || GetActiveWindow()==window2->windowh)
+      && !window2->hide()) PostQuitMessage(0);
+ }
+
+
+3.6 Close and minimize
+exybutton *closeappbutton, *minimizeappbutton;
+void closeappbuttonf();
+void minimizeappbuttonf();
+
+ closeappbutton = new exybutton("closeappbutton", hInstance, window1->windowh);
+ closeappbutton->pos(50, 10, 32, 32);
+ closeappbutton->setbmp("x", "x2");
+ closeappbutton->lmbc = closeappbuttonf;
+ closeappbutton->show();
+
+ minimizeappbutton = new exybutton("minimizeappbutton", hInstance, window1->windowh);
+ minimizeappbutton->pos(10, 10, 32, 32);
+ minimizeappbutton->setbmp("x", "x2");
+ minimizeappbutton->lmbc = minimizeappbuttonf;
+ minimizeappbutton->show();
+
+void closeappbuttonf()
+{
+ PostQuitMessage(0);
+}
+
+void minimizeappbuttonf()
+{
+ ShowWindow(window1->windowh, SW_MINIMIZE);
+}
+
+
+3.7 Sc colors
+ (0, 128, 255) -> text and frame
+ (0, 128, 255) -> active
+
+
+3.8 Timer+thread for wait-and-do-things-with-sync-sock-connection-without-freezing-application
+void CALLBACK apptimer_proc(HWND, UINT, UINT, DWORD);
+HANDLE apptimerthread;
+DWORD WINAPI apptimerthreadfunc(LPVOID);
+int apptimer;
+apptimer = SetTimer(window1->windowh, 2, 1000, apptimer_proc);
+void CALLBACK apptimer_proc(HWND hwnd, UINT uint, UINT nr, DWORD dwtime)
+{
+ KillTimer(window1->windowh, apptimer);
+ DWORD dw;
+ int param = 0;
+ CloseHandle(apptimerthread);
+ apptimerthread = CreateThread(NULL, 0, apptimerthreadfunc, &param, 0, &dw);
+}
+DWORD WINAPI apptimerthreadfunc(LPVOID a)
+{
+ //do stuff here
+ apptimer = SetTimer(window1->windowh, 2, 1000, apptimer_proc);
+}
+
+
+3.9 Post stuff
+ list<string> message;
+ list<string> recvsl;
+ string response;
+ string tmp;
+
+ message.clear(); 
+ message.push_back("POST /index.php HTTP/1.1");
+ message.push_back("Host: wp.pl");
+ message.push_back("User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en; rv:1.9.1.8) Gecko/20100202 Firefox/3.5.8 (.NET CLR 3.5.30729)");
+ message.push_back("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+ message.push_back("Accept-Language: pl,en-us;q=0.7,en;q=0.3");
+ message.push_back("Accept-Charset: ISO-8859-2,utf-8;q=0.7,*;q=0.7");
+ message.push_back("Keep-Alive: 300");
+ message.push_back("Connection: keep-alive");
+ message.push_back("Referer: wp.pl");
+ message.push_back("Content-Type: application/x-www-form-urlencoded");
+ char clength[100];
+ tmp = "post_this_stuff";
+ sprintf(clength, "Content-Length: %d", tmp.length());
+ message.push_back(clength);
+ message.push_back("");
+ message.push_back(tmp);
+ int status;
+ status = exysendb("", "www.wp.pl", 80, 20000, &message, &recvsl);
+ if (status)
+ {
+  //error
+ }
+
+
+3.10 Loading config
+void load_conf()
+{
+ FILE *f;
+ int size;
+ char tmp[100];
+ f = fopen(CONF, "rt");
+ fseek(f, 0, 2);
+ size = ftell(f);
+ rewind(f);
+
+ //read data line by line
+ memset(tmp, 0, 100);
+ while (fgets(tmp, 100, f))
+ {
+  if (tmp[strlen(tmp)-1] == '\n') //removes new line
+   tmp[strlen(tmp)-1] = 0x00;
+  if (strlen(tmp) < 1) //rem empty lines
+   continue;
+  if (tmp[0] == ';') //rem comments
+   continue;
+  
+  //you have line in tmp here
+  char tmp2[100];
+
+  strcpy(tmp2, "port ");
+  if (!strncmp(tmp, tmp2, strlen(tmp2)))
+   commport = atoi(&text[strlen(tmp)]);
+
+  strcpy(tmp, "speed ");
+  if (!strncmp(text, tmp, strlen(tmp)))
+   baudrate = atoi(&text[strlen(tmp)]);
+
+  memset(tmp, 0, 100);
+ }
+ fclose(f);
+}
+
+-=-=-=--=-=
+Other stuff
+-=-=-=--=-=
+4.1 Piping under windows
+Remember to fflush(NULL) the outputs or pipes may bisbehave.
+readconsole - will block the application for the time of getting the output
+readdaemonconsole - will not block the application, will fill the "text" buffor up to "size". When the size is at it's maximum younger half of buffor is removed and older takes its place.
